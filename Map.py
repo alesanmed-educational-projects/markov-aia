@@ -41,7 +41,7 @@ class Map:
 
 	#Devuelve si la posición x,y es un obstáculo
 	def is_obstacle(self, x, y):
-		if self.map_matrix == None:
+		if self.map_matrix is None:
 			self.generate_map()
 
 		#Si la posición está fuera del tablero, es un obstáculo

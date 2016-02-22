@@ -57,7 +57,7 @@ class Model:
 	# La entrada B[i][j][k] es la probabilidad P(y_t = k | x_t = (i,j)) de hallar la observación k en el estado (i,j).
 	def compute_b_matrix(self, map_matrix, error=0.01):
 		shape = map_matrix.get_size()
-		b_matrix = np.zeros((shape[0], shape[1], 4))
+		b_matrix = np.zeros((shape[0], shape[1], 16))
 		for row in range(shape[0]):
 			for column in range(shape[1]):
 				for obs in range(0,16):
@@ -74,15 +74,15 @@ class Model:
 		s = obs[2]
 		w = obs[3]
 
-		aciertos = 0;
+		success = 0;
 		if map_matrix.is_obstacle(x, y-1)==n:
-			aciertos += 1
+			success += 1
 		if map_matrix.is_obstacle(x+1, y)==e:
-			aciertos += 1
+			success += 1
 		if map_matrix.is_obstacle(x, y+1)==s:
-			aciertos += 1
+			success += 1
 		if map_matrix.is_obstacle(x-1, y)==w:
-			aciertos += 1
+			success += 1
 
-		res = (error**(4-aciertos)) * ((1-error)**aciertos)
+		res = (error**(4-success)) * ((1-error)**success)
 		return res;
