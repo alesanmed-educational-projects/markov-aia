@@ -5,21 +5,23 @@ import model
 import numpy as np
 import viterbi
 
+from Map import Map
+
 def main(size, obstacle_rate, error):
 	#map_matrix = generation.generate_map(size, obstacle_rate)
 	####DEV####
-	map_matrix = np.array([ [1 1 1 1 1 1 1 1 1 1],
-							[1 1 0 0 0 0 0 0 0 1],
-							[1 0 0 0 0 0 0 0 0 1],
-							[1 0 0 0 0 0 0 0 0 1],
-							[1 0 0 0 0 0 1 0 0 1],
-							[1 0 0 0 0 0 0 1 0 1],
-							[1 0 0 1 1 0 0 0 0 1],
-							[1 0 0 1 1 1 0 0 0 1],
-							[1 0 0 0 0 0 0 1 0 1],
-							[1 1 1 1 1 1 1 1 1 1]
-						])
-	
+	map_matrix = Map()
+	map_matrix.set_map([[1 1 1 1 1 1 1 1 1 1],
+						[1 1 0 0 0 0 0 0 0 1],
+						[1 0 0 0 0 0 0 0 0 1],
+						[1 0 0 0 0 0 0 0 0 1],
+						[1 0 0 0 0 0 1 0 0 1],
+						[1 0 0 0 0 0 0 1 0 1],
+						[1 0 0 1 1 0 0 0 0 1],
+						[1 0 0 1 1 1 0 0 0 1],
+						[1 0 0 0 0 0 0 1 0 1],
+						[1 1 1 1 1 1 1 1 1 1]])
+
 	observations = generation.generate_sample(map_matrix)
 
 	pi_vector = model.pi_vector(map_matrix)

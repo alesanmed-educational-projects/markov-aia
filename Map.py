@@ -22,6 +22,9 @@ class Map:
 	def get_map(self):
 		return self.map_matrix
 
+	def set_map(self, map_matrix):
+		self.map_matrix = np.array(map_matrix)
+
 	#Genera la matriz mapa, size es una tupla (filas, columnas) y obstacle_rate es el porcentaje de obstáculos en el mapa
 	def generate_map(self):
 		#Genera una matriz aleatoria de tamaño size, cuyos valores son [0, 1] con la proporcion indicada en p
