@@ -31,7 +31,7 @@ class Model:
 	# Probabilidad de pasar de un estado a otro en cualquier momento.
 	# La entrada A[i][j][k] es la probabilidad P(x_{t+1} = k | x_t = (i,j)) de cambiar de un estado i a j, tal que k es cada posibilidad de movimiento.
 	def compute_a_matrix(self, map_matrix):
-		shape = map_matrix.size()
+		shape = map_matrix.get_size()
 		a_matrix = np.zeros((shape[0], shape[1], 4))
 		for row in range(shape[0]):
 			for column in range(shape[1]):
@@ -42,11 +42,11 @@ class Model:
 	#Calcula la matriz pi para el mapa map_matrix.
 	# Probabilidad de comenzar en un estado determinado
 	# La entrada pi[i][j] es la probabilidad P(x_0 = (i,j)) de comenzar en el estado (i,j) en el momento 0.
-	def compute_pi_matrix(map_matrix):
-		pi_matrix = np.zeros(map_matrix.size)
-		num_zeros = (map_matrix.size[0]*map_matrix.size[1]) - np.count_nonzero(map_matrix.map_matrix)
-		for row in range(map_matrix.size[0]):
-			for column in range(map_matrix.size[1]):
+	def compute_pi_matrix(self, map_matrix):
+		pi_matrix = np.zeros(map_matrix.get_size())
+		num_zeros = (map_matrix.get_size()[0]*map_matrix.get_size()[1]) - np.count_nonzero(map_matrix.map_matrix)
+		for row in range(map_matrix.get_size()[0]):
+			for column in range(map_matrix.get_size()[1]):
 				if map_matrix.map_matrix[row][column] == 0:
 					pi_matrix[row][column] = 1 / num_zeros
 
@@ -55,18 +55,18 @@ class Model:
 	#Calcula la matriz B para el mapa map_matrix y el error error.
 	# Matriz de probabilidad de observación.
 	# La entrada B[i][j][k] es la probabilidad P(y_t = k | x_t = (i,j)) de hallar la observación k en el estado (i,j).
-	def compute_b_matrix(map_matrix, error=0.01):
-		shape = map_matrix.size
+	def compute_b_matrix(self, map_matrix, error=0.01):
+		shape = map_matrix.get_size()
 		b_matrix = np.zeros((shape[0], shape[1], 4))
 		for row in range(shape[0]):
 			for column in range(shape[1]):
 				for obs in range(0,16):
-					b_matrix[row][column][obs] = get_observation_rate(map_matrix, column, row, obs, error)
+					b_matrix[row][column][obs] = self.get_observation_rate(map_matrix, column, row, obs, error)
 
 		self.b_matrix = b_matrix
 
 
-	def get_observation_rate(map_matrix, x, y, obs, error):
+	def get_observation_rate(self, map_matrix, x, y, obs, error):
 		obs = functions.obscode_to_bitarray(obs)
 
 		n = obs[0]
@@ -76,13 +76,13 @@ class Model:
 
 		aciertos = 0;
 		if map_matrix.is_obstacle(x, y-1)==n:
-			aciertos++;
+			aciertos += 1
 		if map_matrix.is_obstacle(x+1, y)==e:
-			aciertos++;
+			aciertos += 1
 		if map_matrix.is_obstacle(x, y+1)==s:
-			aciertos++;
+			aciertos += 1
 		if map_matrix.is_obstacle(x-1, y)==w:
-			aciertos++;
+			aciertos += 1
 
 		res = (error**(4-aciertos)) * ((1-error)**aciertos)
 		return res;

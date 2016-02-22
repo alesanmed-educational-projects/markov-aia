@@ -22,11 +22,11 @@ def main(size, obstacle_rate, error):
 						[1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
 						[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
 
-	observations = generation.generate_sample(map_matrix)
+	observations = [1, 3, 4]
 
 	model = Model()
 	model.compute_a_matrix(map_matrix)
-	#model.compute_b_matrix(map_matrix)
+	model.compute_b_matrix(map_matrix)
 	model.compute_pi_matrix(map_matrix)
 
 	final_state = forward.run(model, observations)
