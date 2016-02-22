@@ -41,7 +41,13 @@ class Model:
 
 	#Calcula el vector pi para el mapa map_matrix
 	def compute_pi_matrix(map_matrix):
-		return None
+		pi_matrix = np.zeros(map_matrix.size)
+		num_zeros = (map_matrix.size[0]*map_matrix.size[1]) - np.count_nonzero(map_matrix.map_matrix)
+		for row in range(map_matrix.size[0]):
+			for column in range(map_matrix.size[1]):
+				if map_matrix.map_matrix[row][column] == 0:
+					pi_matrix[row][column] = 1 / num_zeros
+	
 	#Calcula la matriz B para el mapa map_matrix y el error error
 	def compute_b_matrix(map_matrix, error=0.01):
 		return None
