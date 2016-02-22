@@ -6,6 +6,7 @@ import viterbi
 
 from Map import Map
 from Model import Model
+from numpy import unravel_index
 
 def main(size, obstacle_rate, error):
 	#map_matrix = generation.generate_map(size, obstacle_rate)
@@ -33,7 +34,7 @@ def main(size, obstacle_rate, error):
 
 	best_path = viterbi.run(model, observations)
 
-	print("Final state: {0}".format(final_state))
+	print("Final state: {0}".format(unravel_index(np.argmax(final_state), final_state.shape)))
 
 	print("Best path:\n{0}".format(best_path))
 

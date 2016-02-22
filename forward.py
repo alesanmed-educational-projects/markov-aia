@@ -3,7 +3,7 @@ import numpy as np
 
 #Recibe un modelo de markov (matrix A, B y Pi) y un conjunto de observaciones, y devuelve el estado más probable dada la secuencia
 def run(model, observations):
-	return get_alhpas(model, observations, observations.size()-1)
+	return get_alhpas(model, observations, len(observations)-1)
 
 def get_alhpas(model, observations, t):
 	states = model.get_pi_matrix().shape
@@ -51,12 +51,12 @@ def get_direction(departure, arrival):
 	direction = -1
 
 	if departure[0] == arrival[0] and departure[1] - arrival[1] == 1:
-		res = 0 #N
-	if departure[1] == arrival[1] and departure[0] - arrival[0] == -1:
-		res = 1 #E
-	if departure[0] == arrival[0] and departure[1] - arrival[1] == -1:
-		res = 2 #S
-	if departure[1] == arrival[1] and departure[0] - arrival[0] == 1:
-		res = 3 #O
+		direction = 0 #N
+	elif departure[1] == arrival[1] and departure[0] - arrival[0] == -1:
+		direction = 1 #E
+	elif departure[0] == arrival[0] and departure[1] - arrival[1] == -1:
+		direction = 2 #S
+	elif departure[1] == arrival[1] and departure[0] - arrival[0] == 1:
+		direction = 3 #O
 
 	return direction
