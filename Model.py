@@ -1,6 +1,5 @@
 #-*-coding:utf-8-*-
 import numpy as np
-import functions
 
 class Model:
 	def __init__(self):
@@ -61,28 +60,6 @@ class Model:
 		for row in range(shape[0]):
 			for column in range(shape[1]):
 				for obs in range(0,16):
-					b_matrix[row][column][obs] = self.get_observation_rate(map_matrix, column, row, obs, error)
+					b_matrix[row][column][obs] = map_matrix.get_observation_rate(column, row, obs, error)
 
 		self.b_matrix = b_matrix
-
-
-	def get_observation_rate(self, map_matrix, x, y, obs, error):
-		obs = functions.obscode_to_bitarray(obs)
-
-		n = obs[0]
-		e = obs[1]
-		s = obs[2]
-		w = obs[3]
-
-		success = 0;
-		if map_matrix.is_obstacle(x, y-1)==n:
-			success += 1
-		if map_matrix.is_obstacle(x+1, y)==e:
-			success += 1
-		if map_matrix.is_obstacle(x, y+1)==s:
-			success += 1
-		if map_matrix.is_obstacle(x-1, y)==w:
-			success += 1
-
-		res = (error**(4-success)) * ((1-error)**success)
-		return res;

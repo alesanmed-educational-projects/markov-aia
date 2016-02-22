@@ -1,5 +1,6 @@
 #-*-coding:utf-8-*-
 import numpy as np
+import functions
 
 class Map:
 	def __init__(self):		
@@ -77,3 +78,24 @@ class Map:
 				possibilities = np.divide(possibilities, possibilities_size)
 
 		return possibilities
+
+	def get_observation_rate(self, x, y, obs, error):
+		obs = functions.obscode_to_bitarray(obs)
+
+		n = obs[0]
+		e = obs[1]
+		s = obs[2]
+		w = obs[3]
+
+		success = 0;
+		if self.is_obstacle(x, y-1)==n:
+			success += 1
+		if self.is_obstacle(x+1, y)==e:
+			success += 1
+		if self.is_obstacle(x, y+1)==s:
+			success += 1
+		if self.is_obstacle(x-1, y)==w:
+			success += 1
+
+		res = (error**(4-success)) * ((1-error)**success)
+		return res;

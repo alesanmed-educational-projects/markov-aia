@@ -23,7 +23,7 @@ def main(size, obstacle_rate, error):
 						[1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
 						[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
 
-	observations = [1, 3, 4]
+	path, observations = generation.generate_sample(map_matrix, error, 3)
 
 	model = Model()
 	model.compute_a_matrix(map_matrix)
@@ -34,10 +34,10 @@ def main(size, obstacle_rate, error):
 
 	best_path = viterbi.run(model, observations)
 
-	print("Final state: {0}".format(unravel_index(np.argmax(final_state), final_state.shape)))
+	print("Original state: {0}\nEstimated state: {1}".format(path[len(path)-1], unravel_index(np.argmax(final_state), final_state.shape)))
 
 	print("Best path:\n{0}".format(best_path))
 
 
 if __name__ == "__main__":
-	main((10, 10), 0.4, 0.01)
+	main((100, 100), 0.1, 0.01)

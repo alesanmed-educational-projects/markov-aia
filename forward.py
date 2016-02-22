@@ -3,17 +3,21 @@ import numpy as np
 
 #Recibe un modelo de markov (matrix A, B y Pi) y un conjunto de observaciones, y devuelve el estado más probable dada la secuencia
 def run(model, observations):
-	return get_alhpas(model, observations, len(observations)-1)
+	factors, alphas = get_alhpas(model, observations, len(observations)-1, np.empty((0,)))
 
-def get_alhpas(model, observations, t):
+	de_factor = np.prod(factors)
+	
+	return alphas/de_factor
+
+def get_alhpas(model, observations, t, factors):
 	states = model.get_pi_matrix().shape
 	alphas = np.zeros(states)
-	if t == 1:
+	if t == 0:
 		for row in range(states[0]):
 			for column in range(states[1]):
 				alphas[row, column] = model.get_b_matrix()[row, column, observations[0]]
 	else:
-		prev_alphas = get_alhpas(model, observations, t-1)
+		factors, prev_alphas = get_alhpas(model, observations, t-1, factors)
 		for row in range(states[0]):
 			for column in range(states[1]):
 				values = []
@@ -32,7 +36,9 @@ def get_alhpas(model, observations, t):
 				values = sum(values)
 				alphas[row, column] = model.get_b_matrix()[row, column, observations[t]]
 
-	return alphas
+	factor = 1 / alphas.sum()
+	factors = np.append(factors, factor)
+	return factors, alphas*factor
 
 
 
