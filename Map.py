@@ -24,6 +24,7 @@ class Map:
 
 	def set_map(self, map_matrix):
 		self.map_matrix = np.array(map_matrix)
+		self.size = self.map_matrix.shape
 
 	#Genera la matriz mapa, size es una tupla (filas, columnas) y obstacle_rate es el porcentaje de obstáculos en el mapa
 	def generate_map(self):

@@ -27,7 +27,7 @@ class Model:
 
 	#Genera la matriz mapa, size es una tupla (filas, columnas) y obstacle_rate es el porcentaje de obstáculos en el mapa
 	def compute_a_matrix(self, map_matrix):
-		shape = map_matrix.get_map().shape
+		shape = map_matrix.size()
 		a_matrix = np.zeros((shape[0], shape[1], 4))
 		for row in range(shape[0]):
 			for column in range(shape[1]):
