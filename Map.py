@@ -69,11 +69,10 @@ class Map:
 				possibilities[3] = 1.0 #Oeste
 			
 			possibilities_size = np.where(possibilities > 0.0)[0].size
-			print(possibilities_size)
+			
 			#Si podemos ir en alguna direccion
 			if possibilities_size:
-				print("Entra")
 				#Asignamos a todas las opciones posibles la misma probabilidad
-				np.divide(possibilities, possibilities_size)
+				possibilities = np.divide(possibilities, possibilities_size)
 
 		return possibilities

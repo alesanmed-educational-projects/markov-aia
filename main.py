@@ -1,7 +1,6 @@
 #-*-coding:utf-8-*-
 import forward
 import generation
-import model
 import numpy as np
 import viterbi
 
@@ -28,9 +27,7 @@ def main(size, obstacle_rate, error):
 	model = Model()
 	model.compute_a_matrix(map_matrix)
 	#model.compute_b_matrix(map_matrix)
-	#model.compute_pi_matrix(map_matrix)
-
-	print(model.get_a_matrix())
+	model.compute_pi_matrix(map_matrix)
 
 	final_state = forward.run(model, observations)
 
