@@ -38,8 +38,42 @@ class Map:
 
 		self.map_matrix = map_matrix
 
+	#Devuelve si la posición x,y es un obstáculo
 	def is_obstacle(self, x, y):
-		if self.get_map() == None:
+		if self.map_matrix == None:
 			self.generate_map()
 
-		return bool(self.get_map[x, y])
+		#Si la posición está fuera del tablero, es un obstáculo
+		if x < 0 or y < 0:
+			res = True
+		else:
+			try:
+				res = bool(self.map_matrix[x, y])
+			except IndexError:
+				#Si está fuera del tablero, es un obstáculo
+				res = True
+
+		return res
+
+	def get_transitions_rate(self, x, y):
+		possibilities = np.zeros((4,))
+
+		if not self.is_obstacle(x, y):
+			if not self.is_obstacle(x,y-1):
+				possibilities[0] = 1.0 #Norte
+			if not self.is_obstacle(x+1,y):
+				possibilities[1] = 1.0 #Este
+			if not self.is_obstacle(x,y+1):
+				possibilities[2] = 1.0 #Sur
+			if not self.is_obstacle(x-1,y):
+				possibilities[3] = 1.0 #Oeste
+			
+			possibilities_size = np.where(possibilities > 0.0)[0].size
+			print(possibilities_size)
+			#Si podemos ir en alguna direccion
+			if possibilities_size:
+				print("Entra")
+				#Asignamos a todas las opciones posibles la misma probabilidad
+				np.divide(possibilities, possibilities_size)
+
+		return possibilities

@@ -26,18 +26,14 @@ class Model:
 		self.pi_matrix = pi_matrix
 
 	#Genera la matriz mapa, size es una tupla (filas, columnas) y obstacle_rate es el porcentaje de obstáculos en el mapa
-	def compute_a_matrix(map_matrix):
-		a_matrix = np.zeros(map_matrix.shape)
-		for row in range(map_matrix.shape[0]):
-			for column in range(map_matrix.shape[1]):
-				if row == column:
-					a_matrix[row, column] = 0.0 #No se puede permanecer en la misma casilla
-				elif map_matrix[row, column]:
-					a_matrix[row, column] = 0.0 #No se puede ir a una casilla con obstaculo
-				else:
-					get_transition_rate(map_matrix, row, column)
+	def compute_a_matrix(self, map_matrix):
+		shape = map_matrix.get_map().shape
+		a_matrix = np.zeros((shape[0], shape[1], 4))
+		for row in range(shape[0]):
+			for column in range(shape[1]):
+				a_matrix[row, column] = map_matrix.get_transitions_rate(row, column)
 
-		return None
+		self.a_matrix = a_matrix
 
 	#Calcula el vector pi para el mapa map_matrix
 	def compute_pi_matrix(map_matrix):
@@ -53,14 +49,3 @@ class Model:
 		return None
 
 	#Private methods
-	def get_transition_rate(map_matrix, x, y):
-		count = 0.0
-
-		if not map_matrix.is_obstacle(x,y-1):
-			count += 1.0
-		if not map_matrix.is_obstacle(x,y+1):
-			count += 1.0
-		if not map_matrix.is_obstacle(x-1,y):
-			count += 1.0
-		if not map_matrix.is_obstacle(x+1,y):
-			count += 1.0
