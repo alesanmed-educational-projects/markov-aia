@@ -49,3 +49,8 @@ def obscode_to_bitarray(code):
 		return [1, 1, 1, 1];
 	else:
 		return None
+
+def manhattan_distance(point1, point2):
+	distance = abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
+
+	return distance

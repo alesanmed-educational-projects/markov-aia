@@ -1,5 +1,6 @@
 #-*-coding:utf-8-*-
 import forward
+import functions
 import generation
 import numpy as np
 import viterbi
@@ -34,7 +35,9 @@ def main(size, obstacle_rate, error):
 
 	best_path = viterbi.run(model, observations)
 
-	print("Original state: {0}\nEstimated state: {1}".format(path[len(path)-1], unravel_index(np.argmax(final_state), final_state.shape)))
+	forward_error = functions.manhattan_distance(path[len(path) -1], unravel_index(np.argmax(final_state), final_state.shape))
+
+	print("Original state: {0}\nEstimated state: {1}\nError: {2}".format(path[len(path)-1], unravel_index(np.argmax(final_state), final_state.shape), forward_error))
 
 	print("Best path:\n{0}".format(best_path))
 
