@@ -2,7 +2,6 @@
 import functions
 import generation
 import numpy as np
-import viterbi
 
 from Map import Map
 from Model import Model
