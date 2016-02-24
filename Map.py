@@ -2,6 +2,7 @@
 from Model import Model
 import numpy as np
 import functions
+import math
 
 class Map(Model):
 	def __init__(self, size=(10,10), obstacle_rate=0.4, map_matrix=None, error=0.01):		
@@ -198,7 +199,7 @@ class Map(Model):
 
 	# Algoritmo forward para modelos ocultos de markov
 	# 	Recibe:
-	# 		- observations: un conjunto de observaciones,
+	# 		- observations: Lista de observaciones
 	# 	Devuelve:
 	# 		El estado más probable dada la secuencia
 	def forward (self, observations):
@@ -238,3 +239,50 @@ class Map(Model):
 		factor = 1 / alphas.sum()
 		factors = np.append(factors, factor)
 		return factors, alphas*factor
+
+	# Algoritmo de Viterbi para modelos ocultos de Markov.
+	# 	Recibe:
+	# 		- observations: Lista de observaciones
+	# 	Devuelve
+	#		La secuencia de estados mas probable para las observaciones recibidas
+	def viterbi(self, observations):
+		states = self.get_size()
+		result = np.zeros((states[0]*states[1], len(observations)))
+		backpointer = np.ones((states[0]*states[1], len(observations)), 'int32') * -1
+
+		# initialization
+		# 	First column
+		# 	Iterate through states
+		for i in range(result.shape[0]):
+			result[i, 0] = self.get_b_matrix()[i, observations[0]]
+			result[i, 0] += self.get_pi_vector()[i]
+		
+		for t in xrange(1, len(observations)):
+			for j in range(result.shape[0]):
+				result[j, t] = (result[j, t-1].dot(self.get_b_matrix()[j, observations[t]]) * self.get_a_matrix()).max(0)
+
+				
+				result[j, t] *= 
+
+	def viterbi_recursive(observations, t, factors):
+
+		states = self.get_size()
+		alphas = np.zeros(states)
+
+		if t == 0:
+			for row in range(states[0]):
+				for column in range(states[1]):
+					alphas[row, column] = math.log10(self.get_b_matrix()[self.state_translation((row, column)), observations[0]]) + math.log10(self.get_pi_vector()[self.state_translation((row, column))])
+
+		else:
+			factors, prev_alphas = self.viterbi_recursive(observations, t-1, factors)
+			for row in range(states[0]):
+				for column in range(states[1]):
+
+
+					alphas[row, column] = self.get_b_matrix()[self.state_translation((row, column)), observations[t]] * max()
+
+		factor = 1 / alphas.sum()
+		factors = np.append(factors, factor)
+		return factors, alphas*factor
+

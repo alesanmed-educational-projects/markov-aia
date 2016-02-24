@@ -1,3 +1,5 @@
+import math
+
 def obscode_to_bitarray(code):
 	if code==0:
 		# --
@@ -52,5 +54,10 @@ def obscode_to_bitarray(code):
 
 def manhattan_distance(point1, point2):
 	distance = abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
-
 	return distance
+
+def log10(x):
+	if x==0:
+		return 0
+	else:
+		return math.log10(x)

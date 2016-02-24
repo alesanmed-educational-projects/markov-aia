@@ -31,13 +31,13 @@ def main(size, obstacle_rate, error):
 
 	#print(map_matrix.get_b_matrix())
 
-	final_state = map_matrix.forward(observations)
+	#final_state = map_matrix.forward(observations)
 
-	#best_path = viterbi.run(map_matrix, observations)
+	best_path = map_matrix.viterbi(observations)
 
-	forward_error = functions.manhattan_distance(path[len(path) -1], unravel_index(np.argmax(final_state), final_state.shape))
+	#forward_error = functions.manhattan_distance(path[len(path) -1], unravel_index(np.argmax(final_state), final_state.shape))
 
-	print("Original state: {0}\nEstimated state: {1}\nError: {2}".format(path[len(path)-1], unravel_index(np.argmax(final_state), final_state.shape), forward_error))
+	#print("Original state: {0}\nEstimated state: {1}\nError: {2}".format(path[len(path)-1], unravel_index(np.argmax(final_state), final_state.shape), forward_error))
 
 	#print("Best path:\n{0}".format(best_path))
 
