@@ -1,5 +1,7 @@
 #-*-coding:utf-8-*-
 from Model import Model
+from PIL import Image
+
 import numpy as np
 import functions
 import math
@@ -224,3 +226,54 @@ class Map(Model):
 			translated_estimated_path.append((positions[0][estimated_path[index]], positions[1][estimated_path[index]]))
 
 		return translated_estimated_path
+
+	def generate_image(self, final_state, path, best_path, enlarge_factor):
+		map_ = self.get_map();
+		image_points = np.empty((map_.shape[0] * enlarge_factor, map_.shape[1] * enlarge_factor, 3), dtype=np.uint8)
+		image_paths = np.empty((map_.shape[0] * enlarge_factor, map_.shape[1] * enlarge_factor, 3), dtype=np.uint8)
+		path_enlarged = [(i[0]*enlarge_factor, i[1]*enlarge_factor) for i in path]
+		best_path_enlarged = [(i[0]*enlarge_factor, i[1]*enlarge_factor) for i in best_path]
+
+		final_state_i = final_state[0] * enlarge_factor
+		final_state_j = final_state[1] * enlarge_factor
+		for i in range(map_.shape[0]):
+			image_i = i * enlarge_factor
+
+			for j in range(map_.shape[1]):
+				image_j = j * enlarge_factor
+
+				if (image_i, image_j) == best_path_enlarged[0]:
+					value_paths = [67, 7, 233]
+				elif (image_i, image_j) == best_path_enlarged[len(best_path_enlarged) - 1]:
+					value_paths = [160, 126, 251]
+				elif (image_i, image_j) in best_path_enlarged:
+					value_paths = [125, 80, 250]
+				elif (image_i, image_j) == path_enlarged[0]:
+					value_paths = [13, 177, 231]
+				elif (image_i, image_j) == path_enlarged[len(path_enlarged) - 1]:
+					value_paths = [168, 230, 250]
+				elif (image_i, image_j) in path_enlarged:
+					value_paths = [114, 214, 247]
+				elif map_[i, j] == 0:
+					value_paths = 255
+				else:
+					value_paths = 0
+
+				if (image_i, image_j) == (final_state_i, final_state_j):
+					value_points = [255, 0, 0]
+				elif (image_i, image_j) == path_enlarged[len(path_enlarged) - 1]:
+					value_points = [80, 250, 199]				
+				elif map_[i, j] == 0:
+					value_points = 255
+				else:
+					value_points = 0
+
+				for row in range(enlarge_factor):
+					image_points[image_i + row, image_j:image_j+enlarge_factor, :] = value_points
+					image_paths[image_i + row, image_j:image_j+enlarge_factor, :] = value_paths
+
+		image_points = Image.fromarray(image_points)
+		image_points.save('map_points.jpg')
+
+		image_paths = Image.fromarray(image_paths)
+		image_paths.save('map_paths.jpg')
