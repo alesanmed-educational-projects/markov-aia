@@ -56,10 +56,11 @@ class Map(Model):
 	# 	Probabilidad de pasar de un estado a otro en cualquier momento.
 	# 	La entrada A[i][j] es la probabilidad P(x_{t+1} = j | x_t = i) de cambiar de un estado i a j.
 	def compute_a_matrix(self):
-		shape = (self.get_size()[0]**2, self.get_size()[1]**2)
+		valid_states = self.map_matrix.size - np.count_nonzero(self.map_matrix)
+		shape = (valid_states, valid_states)
 		a_matrix = np.zeros((shape[0], shape[1]))
-		for state1 in range(shape[0]):
-			for state2 in range(shape[1]):
+		for state1 in range(valid_states):
+			for state2 in range(valid_states):
 				a_matrix[state1, state2] = self.get_transitions_rate(state1, state2)
 
 		self.a_matrix = a_matrix
@@ -149,12 +150,13 @@ class Map(Model):
 	# 	Se calcula como 1 / numero de posibilidades-no-obstaculos a elegir.
 	# 	Si es obstáculo: Probabilidad 0.
 	def get_transitions_rate(self, state1, state2):
-		origin = np.unravel_index(state1, self.get_size())
-		goal = np.unravel_index(state2, self.get_size())
+		valid_states = np.where(self.get_map() == 0)
+		origin = (valid_states[0][state1], valid_states[1][state1])
+		goal = (valid_states[0][state2], valid_states[1][state2])
 		possibilities = np.zeros((4,))
 		rate = 0.0
 
-		if (not self.is_obstacle(goal[0], goal[1])) and (not self.is_obstacle(origin[0], origin[1])) and self.is_adjacent(origin, goal):
+		if (not goal == origin) and (not self.is_obstacle(origin[0], origin[1])) and self.is_adjacent(origin, goal):
 			if not self.is_obstacle(origin[0],origin[1]-1):
 				possibilities[0] = 1.0 #Norte
 			if not self.is_obstacle(origin[0]+1,origin[1]):
@@ -197,45 +199,12 @@ class Map(Model):
 		res = (self.error**(4-success)) * ((1-self.error)**success)
 		return res;
 
-	# Algoritmo forward para modelos ocultos de markov
-	# 	Recibe:
-	# 		- observations: Lista de observaciones
-	# 	Devuelve:
-	# 		El estado más probable dada la secuencia
-	def forward (self, observations):
-		factors, alphas = self.forward_recursive(observations, len(observations)-1, np.empty((0,)))
+	def forward(self, observations):
+		alphas = super(Map, self).forward(observations)
+		best_state = np.argmax(alphas)
+		np.savetxt("alphas.txt", alphas)
+		"""positions = np.where(self.get_map() == 0)
 
-		de_factor = np.prod(factors)
-	
-		return alphas/de_factor
+		return (positions[0][best_state], positions[1][best_state])"""
 
-	def forward_recursive(self, observations, t, factors):
-		states = self.get_size()
-		alphas = np.zeros(states)
-		if t == 0:
-			for row in range(states[0]):
-				for column in range(states[1]):
-					alphas[row, column] = self.get_b_matrix()[self.state_translation((row, column)), observations[0]]
-		else:
-			factors, prev_alphas = self.forward_recursive(observations, t-1, factors)
-			for row in range(states[0]):
-				for column in range(states[1]):
-					values = []
-
-					for row_2 in range(states[0]): # TODO: creo que si haces un range(x-1, y+2) range(y-1, y+2) solo hace el for ya por las adyacentes 
-						for column_2 in range(states[1]): # asi te ahorras tiempo
-							if self.is_adjacent((row_2, column_2), (row, column)):
-								direction = self.get_direction((row_2, column_2), (row, column))
-								if direction == -1:
-									raise ValueError("Direccion = -1, salida {0}, llegada {1}".format((row_2, column_2), (row, column)))
-
-								values.append(self.get_a_matrix()[self.state_translation((row_2, column_2)), self.state_translation((row_2, column_2))]*alphas[row_2, column_2])
-							else:
-								values.append(0.0)
-
-					values = sum(values)
-					alphas[row, column] = self.get_b_matrix()[self.state_translation((row, column)), observations[t]]
-
-		factor = 1 / alphas.sum()
-		factors = np.append(factors, factor)
-		return factors, alphas*factor
+		return np.unravel_index(best_state, self.get_map().shape)

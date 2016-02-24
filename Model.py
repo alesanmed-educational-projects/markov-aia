@@ -34,7 +34,35 @@ class Model:
 	
 	def compute_b_matrix(self):
 		raise NotImplementedError
+	# Algoritmo forward para modelos ocultos de markov
+	# 	Recibe:
+	# 		- observations: Lista de observaciones
+	# 	Devuelve:
+	# 		El estado más probable dada la secuencia
+	def forward (self, observations):
+		alphas = self.forward_recursive(observations, len(observations)-1)
+	
+		return alphas
 
+	def forward_recursive(self, observations, t):
+		states = self.get_b_matrix().shape[0]
+		alphas = np.zeros((states,))
+		if t == 0:
+			for state in range(states):
+				alphas[state] = self.get_b_matrix()[state, observations[0]] * self.get_pi_vector()[state]
+		else:
+			prev_alphas = self.forward_recursive(observations, t-1)
+			for state_j in range(states):
+				values = 0.0
+
+				for state_i in range(states):
+					values += (self.get_a_matrix()[state_i, state_j] * self.get_pi_vector()[state_i])
+				
+				alpha = values * self.get_b_matrix()[state_j, observations[t]]
+				alphas[state_j] = alpha
+
+		return alphas / alphas.sum()
+		
 	# Algoritmo de Viterbi para modelos ocultos de Markov.
 	# 	Recibe:
 	# 		- observations: Lista de observaciones
