@@ -27,7 +27,7 @@ def generate_sample(map_matrix, steps):
 		observation = None
 		state_observations = np.empty((16,))
 		for obs_code in range(0, 16):
-			state_observations[obs_code] = map_matrix.get_observation_rate(path[i][1], path[i][0], obs_code)	
+			state_observations[obs_code] = map_matrix.get_observation_rate_coords(path[i][1], path[i][0], obs_code)	
 
 		observation = np.random.choice(range(0, 16), 1, p=state_observations)[0]
 		observations.append(observation)

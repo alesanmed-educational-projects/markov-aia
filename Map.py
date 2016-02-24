@@ -69,13 +69,9 @@ class Map(Model):
 	# 	Probabilidad de comenzar en un estado determinado
 	# 	La entrada pi[i] es la probabilidad P(x_0 = i) de comenzar en el estado i en el momento 0.
 	def compute_pi_vector(self):
-		size = self.get_size()
-		pi_vector = np.zeros(size[0]*size[1])
-		num_zeros = (size[0]*size[1]) - np.count_nonzero(self.map_matrix)
-		for row in range(size[0]):
-			for column in range(size[1]):
-				if self.map_matrix[row][column] == 0:
-					pi_vector[self.state_translation((row, column))] = 1 / num_zeros
+		valid_states = self.map_matrix.size - np.count_nonzero(self.map_matrix)
+		pi_vector = np.empty(valid_states)
+		pi_vector.fill(1/valid_states)
 
 		self.pi_vector = pi_vector
 	
@@ -83,12 +79,11 @@ class Map(Model):
 	# 	Probabilidad de detectar una observación en un estado concreto
 	# 	La entrada B[i][j] es la probabilidad P(y_t = j | x_t = i) de hallar la observación j en el estado i.
 	def compute_b_matrix(self):
-		shape = self.get_size()
-		b_matrix = np.zeros((shape[0]*shape[1], 16))
-		for row in range(shape[0]):
-			for column in range(shape[1]):
-				for obs in range(0,16):
-					b_matrix[self.state_translation((row, column))][obs] = self.get_observation_rate(row, column, obs)
+		valid_states = self.map_matrix.size - np.count_nonzero(self.map_matrix)
+		b_matrix = np.zeros((valid_states, 16))
+		for state in range(valid_states):
+			for obs in range(0,16):
+				b_matrix[state][obs] = self.get_observation_rate(state, obs)
 
 		self.b_matrix = b_matrix
 
@@ -178,7 +173,35 @@ class Map(Model):
 	# Probabilidad de detectar observacion en un punto de coordenadas concretas
 	# 	(x, y) son las coordenadas del punto.
 	# 	obs es un número entero (0-15) que representa las observaciones posibles. (Ver: Functions.obscode_to_bitarray)
-	def get_observation_rate(self, x, y, obs):
+	def get_observation_rate_coords(self, x, y, obs):
+		obs = functions.obscode_to_bitarray(obs)
+
+		n = obs[0]
+		e = obs[1]
+		s = obs[2]
+		w = obs[3]
+
+		success = 0;
+		if self.is_obstacle(x, y-1)==n:
+			success += 1
+		if self.is_obstacle(x+1, y)==e:
+			success += 1
+		if self.is_obstacle(x, y+1)==s:
+			success += 1
+		if self.is_obstacle(x-1, y)==w:
+			success += 1
+
+		res = (self.error**(4-success)) * ((1-self.error)**success)
+		return res;
+
+	# Probabilidad de detectar observacion en estado state concreto. El estado i sera la i-esima ocurrencia de una casilla
+	#	valida en el mapa original
+	# 	obs es un número entero (0-15) que representa las observaciones posibles. (Ver: Functions.obscode_to_bitarray)
+	def get_observation_rate(self, state, obs):
+		valid_states = np.where(self.get_map() == 0)
+		x = valid_states[0][state]
+		y = valid_states[1][state]
+
 		obs = functions.obscode_to_bitarray(obs)
 
 		n = obs[0]
@@ -202,9 +225,8 @@ class Map(Model):
 	def forward(self, observations):
 		alphas = super(Map, self).forward(observations)
 		best_state = np.argmax(alphas)
+
 		np.savetxt("alphas.txt", alphas)
-		"""positions = np.where(self.get_map() == 0)
+		positions = np.where(self.get_map() == 0)
 
-		return (positions[0][best_state], positions[1][best_state])"""
-
-		return np.unravel_index(best_state, self.get_map().shape)
+		return (positions[0][best_state], positions[1][best_state])
