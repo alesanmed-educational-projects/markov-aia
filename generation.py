@@ -15,7 +15,7 @@ def generate_map(size, obstacle_rate = 0.4):
 	return map_matrix
 
 #Generar una muestra de camino por el mapa map_matrix
-def generate_sample(map_matrix, error, steps):
+def generate_sample(map_matrix, steps):
 	starting_point = np.where(map_matrix.get_map() == 0)
 
 	index = random.randrange(len(starting_point[0]))
@@ -27,7 +27,7 @@ def generate_sample(map_matrix, error, steps):
 		observation = None
 		state_observations = np.empty((16,))
 		for obs_code in range(0, 16):
-			state_observations[obs_code] = map_matrix.get_observation_rate(path[i][1], path[i][0], obs_code, error)	
+			state_observations[obs_code] = map_matrix.get_observation_rate(path[i][1], path[i][0], obs_code)	
 
 		observation = np.random.choice(range(0, 16), 1, p=state_observations)[0]
 		observations.append(observation)

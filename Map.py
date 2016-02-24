@@ -123,9 +123,26 @@ class Map(Model):
 
 		return res
 
-	# Devuelve si los dos puntos son adyacentes
+	# Devuelve si los dos puntos son adyacentes, basado en la distancia de Manhattan
+	# 	(Ver: Functions.manhattan_distance)
 	def is_adjacent(self, point1, point2):
 		return functions.manhattan_distance(point1, point2) == 1
+
+	# Devuelve la dirección en código numérico entre dos casillas
+	# 	0: Norte, 1: Este, 2: Sur, 3: Oeste
+	def get_direction(self, departure, arrival):
+		direction = -1
+
+		if departure[0] == arrival[0] and departure[1] - arrival[1] == 1:
+			direction = 0 #N
+		elif departure[1] == arrival[1] and departure[0] - arrival[0] == -1:
+			direction = 1 #E
+		elif departure[0] == arrival[0] and departure[1] - arrival[1] == -1:
+			direction = 2 #S
+		elif departure[1] == arrival[1] and departure[0] - arrival[0] == 1:
+			direction = 3 #O
+
+		return direction
 
 	# Probabilidad de transición de un estado a otro concreto.
 	# 	Se calcula como 1 / numero de posibilidades-no-obstaculos a elegir.
@@ -178,3 +195,46 @@ class Map(Model):
 
 		res = (self.error**(4-success)) * ((1-self.error)**success)
 		return res;
+
+	# Algoritmo forward para modelos ocultos de markov
+	# 	Recibe:
+	# 		- observations: un conjunto de observaciones,
+	# 	Devuelve:
+	# 		El estado más probable dada la secuencia
+	def forward (self, observations):
+		factors, alphas = self.forward_recursive(observations, len(observations)-1, np.empty((0,)))
+
+		de_factor = np.prod(factors)
+	
+		return alphas/de_factor
+
+	def forward_recursive(self, observations, t, factors):
+		states = self.get_size()
+		alphas = np.zeros(states)
+		if t == 0:
+			for row in range(states[0]):
+				for column in range(states[1]):
+					alphas[row, column] = self.get_b_matrix()[self.state_translation((row, column)), observations[0]]
+		else:
+			factors, prev_alphas = self.forward_recursive(observations, t-1, factors)
+			for row in range(states[0]):
+				for column in range(states[1]):
+					values = []
+
+					for row_2 in range(states[0]): # TODO: creo que si haces un range(x-1, y+2) range(y-1, y+2) solo hace el for ya por las adyacentes 
+						for column_2 in range(states[1]): # asi te ahorras tiempo
+							if self.is_adjacent((row_2, column_2), (row, column)):
+								direction = self.get_direction((row_2, column_2), (row, column))
+								if direction == -1:
+									raise ValueError("Direccion = -1, salida {0}, llegada {1}".format((row_2, column_2), (row, column)))
+
+								values.append(self.get_a_matrix()[self.state_translation((row_2, column_2)), self.state_translation((row_2, column_2))]*alphas[row_2, column_2])
+							else:
+								values.append(0.0)
+
+					values = sum(values)
+					alphas[row, column] = self.get_b_matrix()[self.state_translation((row, column)), observations[t]]
+
+		factor = 1 / alphas.sum()
+		factors = np.append(factors, factor)
+		return factors, alphas*factor
