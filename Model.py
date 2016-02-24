@@ -2,11 +2,11 @@
 import numpy as np
 
 class Model:
-	def __init__(self, a_matrix, b_matrix, pi_matrix, states_translation):
+	def __init__(self, a_matrix, b_matrix, pi_vector, state_translation):
 		self.a_matrix = a_matrix
 		self.b_matrix = b_matrix
-		self.pi_matrix = pi_matrix
-		self.states_translation = states_translation
+		self.pi_vector = pi_vector
+		self.state_translation = state_translation
 
 	def get_a_matrix(self):
 		return self.a_matrix
@@ -20,16 +20,16 @@ class Model:
 	def set_b_matrix(self, b_matrix):
 		self.b_matrix = b_matrix
 
-	def get_pi_matrix(self):
-		return self.pi_matrix
+	def get_pi_vector(self):
+		return self.pi_vector
 
-	def set_pi_matrix(self, pi_matrix):
-		self.pi_matrix = pi_matrix
+	def set_pi_vector(self, pi_vector):
+		self.pi_vector = pi_vector
 
 	def compute_a_matrix(self):
 		raise NotImplementedError
 
-	def compute_pi_matrix(self):
+	def compute_pi_vector(self):
 		raise NotImplementedError
 	
 	def compute_b_matrix(self):

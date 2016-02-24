@@ -28,7 +28,7 @@ def main(size, obstacle_rate, error):
 
 	map_matrix.compute_a_matrix()
 	map_matrix.compute_b_matrix()
-	map_matrix.compute_pi_matrix()
+	map_matrix.compute_pi_vector()
 
 	print(map_matrix.get_b_matrix())
 

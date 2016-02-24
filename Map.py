@@ -11,48 +11,8 @@ class Map(Model):
 		self.error = error
 		self.a_matrix = None
 		self.b_matrix = None
-		self.pi_matrix = None
-		self.states_translation = np.arange(size[0]*size[1])
-
-	#Genera la matriz mapa, size es una tupla (filas, columnas) y obstacle_rate es el porcentaje de obstáculos en el mapa.
-	# Matriz de transición.
-	# Probabilidad de pasar de un estado a otro en cualquier momento.
-	# La entrada A[i][j][k] es la probabilidad P(x_{t+1} = k | x_t = (i,j)) de cambiar de un estado i a j, tal que k es cada posibilidad de movimiento.
-	def compute_a_matrix(self):
-		shape = (self.get_size()[0]**2, self.get_size()[1]**2)
-		a_matrix = np.zeros((shape[0], shape[1]))
-		for state1 in range(shape[0]):
-			for state2 in range(shape[1]):
-				a_matrix[state1, state2] = self.get_transitions_rate(state1, state2)
-
-		self.a_matrix = a_matrix
-
-	#Calcula la matriz pi para el mapa map_matrix.
-	# Probabilidad de comenzar en un estado determinado
-	# La entrada pi[i][j] es la probabilidad P(x_0 = (i,j)) de comenzar en el estado (i,j) en el momento 0.
-	def compute_pi_matrix(self):
-		size = self.get_size()
-		pi_matrix = np.zeros(size[0]*size[1])
-		num_zeros = (size[0]*size[1]) - np.count_nonzero(self.map_matrix)
-		for row in range(size[0]):
-			for column in range(size[1]):
-				if self.map_matrix[row][column] == 0:
-					pi_matrix[row * size[1] + column] = 1 / num_zeros
-
-		self.pi_matrix = pi_matrix
-	
-	#Calcula la matriz B para el mapa map_matrix y el error error.
-	# Matriz de probabilidad de observación.
-	# La entrada B[i][j] es la probabilidad P(y_t = k | x_t = (i,j)) de hallar la observación k en el estado (i,j).
-	def compute_b_matrix(self):
-		shape = self.get_size()
-		b_matrix = np.zeros((shape[0]*shape[1], 16))
-		for row in range(shape[0]):
-			for column in range(shape[1]):
-				for obs in range(0,16):
-					b_matrix[row*shape[1] + column][obs] = self.get_observation_rate(row, column, obs)
-
-		self.b_matrix = b_matrix
+		self.pi_vector = None
+		self.state_translation = self.coordinates_to_state #np.arange(size[0]*size[1])
 
 	def get_size(self):
 		return self.size
@@ -73,7 +33,67 @@ class Map(Model):
 		self.map_matrix = np.array(map_matrix)
 		self.size = self.map_matrix.shape
 
-	#Genera la matriz mapa, size es una tupla (filas, columnas) y obstacle_rate es el porcentaje de obstáculos en el mapa
+	def get_error(self):
+		return self.error
+
+	def set_error(self, error):
+		self.error = error
+
+	# Estados estan representados de la siguiente manera:
+	# 
+	#  (Coord)  y->
+	#    -------------
+	#  x | 0 | 1 | 2 |
+	#  | -------------
+	#  v | 3 | 4 | 5 |
+	#    -------------
+	#
+	def coordinates_to_state(self, point):
+		return point[0] * self.get_size()[1] + point[1]
+
+	# Matriz de transición.
+	# 	Probabilidad de pasar de un estado a otro en cualquier momento.
+	# 	La entrada A[i][j] es la probabilidad P(x_{t+1} = j | x_t = i) de cambiar de un estado i a j.
+	def compute_a_matrix(self):
+		shape = (self.get_size()[0]**2, self.get_size()[1]**2)
+		a_matrix = np.zeros((shape[0], shape[1]))
+		for state1 in range(shape[0]):
+			for state2 in range(shape[1]):
+				a_matrix[state1, state2] = self.get_transitions_rate(state1, state2)
+
+		self.a_matrix = a_matrix
+
+	# Vector de probabilidades iniciales
+	# 	Probabilidad de comenzar en un estado determinado
+	# 	La entrada pi[i] es la probabilidad P(x_0 = i) de comenzar en el estado i en el momento 0.
+	def compute_pi_vector(self):
+		size = self.get_size()
+		pi_vector = np.zeros(size[0]*size[1])
+		num_zeros = (size[0]*size[1]) - np.count_nonzero(self.map_matrix)
+		for row in range(size[0]):
+			for column in range(size[1]):
+				if self.map_matrix[row][column] == 0:
+					pi_vector[self.state_translation((row, column))] = 1 / num_zeros
+
+		self.pi_vector = pi_vector
+	
+	# Matriz de probabilidad de observación.
+	# 	Probabilidad de detectar una observación en un estado concreto
+	# 	La entrada B[i][j] es la probabilidad P(y_t = j | x_t = i) de hallar la observación j en el estado i.
+	def compute_b_matrix(self):
+		shape = self.get_size()
+		b_matrix = np.zeros((shape[0]*shape[1], 16))
+		for row in range(shape[0]):
+			for column in range(shape[1]):
+				for obs in range(0,16):
+					b_matrix[self.state_translation((row, column))][obs] = self.get_observation_rate(row, column, obs)
+
+		self.b_matrix = b_matrix
+
+	#Genera la matriz mapa
+	#   0 -> Hueco libre
+	#	1 -> Obstáculo
+	# 	Los bordes son siempre obstáculos
 	def generate_map(self):
 		#Genera una matriz aleatoria de tamaño size, cuyos valores son [0, 1] con la proporcion indicada en p
 		map_matrix = np.random.choice([0, 1], size=self.size, p=[1 - self.obstacle_rate, self.obstacle_rate])
@@ -86,7 +106,7 @@ class Map(Model):
 
 		self.map_matrix = map_matrix
 
-	#Devuelve si la posición x,y es un obstáculo
+	# Devuelve si la posición x,y es un obstáculo
 	def is_obstacle(self, x, y):
 		if self.map_matrix is None:
 			self.generate_map()
@@ -103,9 +123,13 @@ class Map(Model):
 
 		return res
 
+	# Devuelve si los dos puntos son adyacentes
 	def is_adjacent(self, point1, point2):
 		return functions.manhattan_distance(point1, point2) == 1
 
+	# Probabilidad de transición de un estado a otro concreto.
+	# 	Se calcula como 1 / numero de posibilidades-no-obstaculos a elegir.
+	# 	Si es obstáculo: Probabilidad 0.
 	def get_transitions_rate(self, state1, state2):
 		origin = np.unravel_index(state1, self.get_size())
 		goal = np.unravel_index(state2, self.get_size())
@@ -131,6 +155,9 @@ class Map(Model):
 
 		return rate
 
+	# Probabilidad de detectar observacion en un punto de coordenadas concretas
+	# 	(x, y) son las coordenadas del punto.
+	# 	obs es un número entero (0-15) que representa las observaciones posibles. (Ver: Functions.obscode_to_bitarray)
 	def get_observation_rate(self, x, y, obs):
 		obs = functions.obscode_to_bitarray(obs)
 
