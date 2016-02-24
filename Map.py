@@ -125,22 +125,6 @@ class Map(Model):
 	def is_adjacent(self, point1, point2):
 		return functions.manhattan_distance(point1, point2) == 1
 
-	# Devuelve la dirección en código numérico entre dos casillas
-	# 	0: Norte, 1: Este, 2: Sur, 3: Oeste
-	def get_direction(self, departure, arrival):
-		direction = -1
-
-		if departure[0] == arrival[0] and departure[1] - arrival[1] == 1:
-			direction = 0 #N
-		elif departure[1] == arrival[1] and departure[0] - arrival[0] == -1:
-			direction = 1 #E
-		elif departure[0] == arrival[0] and departure[1] - arrival[1] == -1:
-			direction = 2 #S
-		elif departure[1] == arrival[1] and departure[0] - arrival[0] == 1:
-			direction = 3 #O
-
-		return direction
-
 	# Probabilidad de transición de un estado a otro concreto.
 	# 	Se calcula como 1 / numero de posibilidades-no-obstaculos a elegir.
 	# 	Si es obstáculo: Probabilidad 0.
@@ -152,13 +136,13 @@ class Map(Model):
 		rate = 0.0
 
 		if (not goal == origin) and (not self.is_obstacle(origin[0], origin[1])) and self.is_adjacent(origin, goal):
-			if not self.is_obstacle(origin[0],origin[1]-1):
-				possibilities[0] = 1.0 #Norte
-			if not self.is_obstacle(origin[0]+1,origin[1]):
-				possibilities[1] = 1.0 #Este
-			if not self.is_obstacle(origin[0],origin[1]+1):
-				possibilities[2] = 1.0 #Sur
 			if not self.is_obstacle(origin[0]-1,origin[1]):
+				possibilities[0] = 1.0 #Norte
+			if not self.is_obstacle(origin[0],origin[1]+1):
+				possibilities[1] = 1.0 #Este
+			if not self.is_obstacle(origin[0]+1,origin[1]):
+				possibilities[2] = 1.0 #Sur
+			if not self.is_obstacle(origin[0],origin[1]-1):
 				possibilities[3] = 1.0 #Oeste
 			
 			possibilities_size = np.where(possibilities > 0.0)[0].size
@@ -182,13 +166,13 @@ class Map(Model):
 		w = obs[3]
 
 		success = 0;
-		if self.is_obstacle(x, y-1)==n:
+		if self.is_obstacle(x-1, y)==n:
 			success += 1
-		if self.is_obstacle(x+1, y)==e:
+		if self.is_obstacle(x, y+1)==e:
 			success += 1
-		if self.is_obstacle(x, y+1)==s:
+		if self.is_obstacle(x+1, y)==s:
 			success += 1
-		if self.is_obstacle(x-1, y)==w:
+		if self.is_obstacle(x, y-1)==w:
 			success += 1
 
 		res = (self.error**(4-success)) * ((1-self.error)**success)
@@ -210,13 +194,13 @@ class Map(Model):
 		w = obs[3]
 
 		success = 0;
-		if self.is_obstacle(x, y-1)==n:
+		if self.is_obstacle(x-1, y)==n:
 			success += 1
-		if self.is_obstacle(x+1, y)==e:
+		if self.is_obstacle(x, y+1)==e:
 			success += 1
-		if self.is_obstacle(x, y+1)==s:
+		if self.is_obstacle(x+1, y)==s:
 			success += 1
-		if self.is_obstacle(x-1, y)==w:
+		if self.is_obstacle(x, y-1)==w:
 			success += 1
 
 		res = (self.error**(4-success)) * ((1-self.error)**success)
@@ -226,7 +210,17 @@ class Map(Model):
 		alphas = super(Map, self).forward(observations)
 		best_state = np.argmax(alphas)
 
-		np.savetxt("alphas.txt", alphas)
 		positions = np.where(self.get_map() == 0)
 
 		return (positions[0][best_state], positions[1][best_state])
+
+	def viterbi(self, observations):
+		estimated_path = super(Map, self).viterbi(observations)
+		positions = np.where(self.get_map() == 0)
+
+		translated_estimated_path = []
+
+		for index in range(len(estimated_path)):
+			translated_estimated_path.append((positions[0][estimated_path[index]], positions[1][estimated_path[index]]))
+
+		return translated_estimated_path

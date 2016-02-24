@@ -63,18 +63,23 @@ class Model:
 
 		return alphas / alphas.sum()
 		
-	"""# Algoritmo de Viterbi para modelos ocultos de Markov.
+	# Algoritmo de Viterbi para modelos ocultos de Markov.
 	# 	Recibe:
 	# 		- observations: Lista de observaciones
 	# 	Devuelve
 	#		La secuencia de estados mas probable para las observaciones recibidas
 	def viterbi(self, observations):
 		states = self.get_b_matrix().shape[0]
-		nus, back_pointers = viterbi_recursive(observations, len(observations) - 1, np.zeros((len(observations) - 1, states)))
+		nus, back_pointers = self.viterbi_recursive(observations, len(observations) - 1, np.zeros((len(observations), states)))
 
-		return None
+		estimated_path = np.array([np.argmax(nus)])
+		for t in range(len(observations)-1, 0, -1):
+			estimated_path = np.insert(estimated_path, 0, back_pointers[t, estimated_path[0]])
 
-	def viterbi_recursive(observations, t, back_pointers):
+		return estimated_path
+
+
+	def viterbi_recursive(self, observations, t, back_pointers):
 		states = self.get_b_matrix().shape[0]
 		nus = np.zeros((states,))
 
@@ -87,14 +92,12 @@ class Model:
 			prev_nus, back_pointers = self.viterbi_recursive(observations, t-1, back_pointers)
 
 			for state_j in range(states):
-				max_value = -1
-				for state_i in range(states):
-					candidate = 
-					values += (self.get_a_matrix()[state_i, state_j] * self.get_pi_vector()[state_i])
-				
-				alpha = values * self.get_b_matrix()[state_j, observations[t]]
-				alphas[state_j] = alpha
+				processed_nu = np.empty((states,))
 
-		factor = 1 / nus.sum()
-		factors = np.append(factors, factor)
-		return factors, nus*factor"""
+				for state_i in range(states):
+					processed_nu[state_i] = self.get_a_matrix()[state_i, state_j] * prev_nus[state_i]
+				
+				nus[state_j] = self.get_b_matrix()[state_j, observations[t]] * np.amax(processed_nu)
+				back_pointers[t, state_j] = np.argmax(processed_nu)
+
+		return nus, back_pointers

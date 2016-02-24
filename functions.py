@@ -56,6 +56,14 @@ def manhattan_distance(point1, point2):
 	distance = abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
 	return distance
 
+def path_error(real, estimated):
+	errors = 0
+	for state in range(len(estimated)):
+		if estimated[state] != real[state]:
+			errors += 1
+	return errors / len(estimated)
+
+
 def log10(x):
 	if x==0:
 		return 0

@@ -23,25 +23,27 @@ def generate_sample(map_matrix, steps):
 
 	path = [start_coord]
 	observations = []
-	for i in range(0, steps):
+	for i in range(steps):
 		observation = None
 		state_observations = np.empty((16,))
 		for obs_code in range(0, 16):
-			state_observations[obs_code] = map_matrix.get_observation_rate_coords(path[i][1], path[i][0], obs_code)	
+			state_observations[obs_code] = map_matrix.get_observation_rate_coords(path[i-1][0], path[i-1][1], obs_code)	
 
 		observation = np.random.choice(range(0, 16), 1, p=state_observations)[0]
 		observations.append(observation)
 
-		observation = functions.obscode_to_bitarray(observation)
-		movements = get_movements(map_matrix, path[i][1], path[i][0], observation)
-		
-		if np.all(movements == 1):
-			break
-		else:
-			options = np.where(movements == 0)
-			index = random.randrange(len(options[0]))
-			movement = options[0][index]
-			path.append(make_movement(path[i][0], path[i][1], movement))
+		if i > 0:
+			observation = functions.obscode_to_bitarray(observation)
+			movements = get_movements(map_matrix, path[i-1][1], path[i-1][0], observation)
+			
+			if np.all(movements == 1):
+				observations.pop()
+				break
+			else:
+				options = np.where(movements == 0)
+				index = random.randrange(len(options[0]))
+				movement = options[0][index]
+				path.append(make_movement(path[i-1][0], path[i-1][1], movement))
 
 	return path, observations
 
