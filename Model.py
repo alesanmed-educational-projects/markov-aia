@@ -53,6 +53,7 @@ class Model:
 		else:
 			prev_alphas = self.forward_recursive(observations, t-1)
 			for state_j in range(states):
+				#print("Forward State {0}/{1} iteration {2}".format(state_j, states, t))
 				values = 0.0
 
 				for state_i in range(states):
@@ -92,6 +93,7 @@ class Model:
 			prev_nus, back_pointers = self.viterbi_recursive(observations, t-1, back_pointers)
 
 			for state_j in range(states):
+				#print("Forward State {0}/{1} iteration {2}".format(state_j, states, t))
 				processed_nu = np.empty((states,))
 
 				for state_i in range(states):
