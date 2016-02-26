@@ -31,9 +31,9 @@ def generate_sample(map_matrix, steps):
 	observation = np.random.choice(range(0, 16), 1, p=state_observations)[0]
 	observations.append(observation)
 
-	for i in range(1, steps-1):
+	for i in range(1, steps):
 		observation = functions.obscode_to_bitarray(observations[i-1])
-		movements = get_movements(map_matrix, path[i-1][1], path[i-1][0], observation)
+		movements = get_movements(map_matrix, path[i-1][0], path[i-1][1], observation)
 		
 		if np.all(movements == 1):
 			break

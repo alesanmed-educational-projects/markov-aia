@@ -43,4 +43,4 @@ def test(size, obstacle_rate, error, path_length):
 
 
 if __name__ == "__main__":
-	test((50, 50), 0.4, 0.01, 10)
+	test((40, 40), 0.4, 0.01, 10)

@@ -10,7 +10,6 @@ from numpy import unravel_index
 
 def main(size, obstacle_rate, error, path_length, enlarge_factor):
 	map_matrix = generation.generate_map(size, obstacle_rate)
-	print("Map generated")
 	path, observations = generation.generate_sample(map_matrix, path_length)
 
 
@@ -28,10 +27,8 @@ def main(size, obstacle_rate, error, path_length, enlarge_factor):
 	path_error = functions.path_error(path, best_path)
 
 	print("Original state: {0}\nEstimated state: {1}\nError: {2}".format(path[len(path)-1], final_state, forward_error))
-	print(path)
-	print(observations)
 	print("Original path: {0}\nBest path:{1}\nError: {2}".format(path, best_path, path_error))
 
 
 if __name__ == "__main__":
-	main((40, 40), 0.4, 0.01, 15, 50)
+	main((40, 40), 0.4, 0.01, 20, 50)
