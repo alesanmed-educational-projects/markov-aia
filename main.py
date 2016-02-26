@@ -17,7 +17,7 @@ def main(size, obstacle_rate, error, path_length, enlarge_factor):
 	map_matrix.compute_a_matrix()
 	map_matrix.compute_b_matrix()
 	map_matrix.compute_pi_vector()
-	
+
 	final_state = map_matrix.forward(observations)
 
 	best_path = map_matrix.viterbi(observations)
@@ -34,4 +34,4 @@ def main(size, obstacle_rate, error, path_length, enlarge_factor):
 
 
 if __name__ == "__main__":
-	main((20, 20), 0.4, 0.01, 6, 30)
+	main((40, 40), 0.4, 0.01, 15, 50)

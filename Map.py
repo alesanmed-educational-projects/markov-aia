@@ -62,7 +62,7 @@ class Map(Model):
 		shape = (valid_states, valid_states)
 		a_matrix = np.zeros((shape[0], shape[1]))
 		for state1 in range(valid_states):
-			print("Compute A: {0}/{1}".format(state1, valid_states))
+			#print("Compute A: {0}/{1}".format(state1, valid_states))
 			for state2 in range(valid_states):
 				a_matrix[state1, state2] = self.get_transitions_rate(state1, state2)
 
@@ -86,7 +86,7 @@ class Map(Model):
 		valid_states = self.map_matrix.size - np.count_nonzero(self.map_matrix)
 		b_matrix = np.zeros((valid_states, 16))
 		for state in range(valid_states):
-			print("Compute B: {0}/{1}".format(state, valid_states))
+			#print("Compute B: {0}/{1}".format(state, valid_states))
 			for obs in range(0,16):
 				b_matrix[state][obs] = self.get_observation_rate(state, obs)
 
